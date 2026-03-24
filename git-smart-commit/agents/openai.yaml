@@ -1,0 +1,7 @@
+interface:
+  display_name: "Git Smart Commit"
+  short_description: "Generate conventional commit messages from git changes"
+  icon_small: "./assets/icon-small.svg"
+  icon_large: "./assets/icon-large.svg"
+  brand_color: "#F97316"
+  default_prompt: "Use $git-smart-commit to analyze current git changes and draft a conventional commit message."
