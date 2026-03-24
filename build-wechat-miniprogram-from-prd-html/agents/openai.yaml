@@ -1,0 +1,4 @@
+interface:
+  display_name: "微信小程序 PRD 转页"
+  short_description: "把 PRD HTML 转成微信小程序页面"
+  default_prompt: "Use $build-wechat-miniprogram-from-prd-html to convert this PRD HTML into WeChat Mini Program files, preserve compatible TailwindCSS classes, and prefer existing tdesign-miniprogram components."
