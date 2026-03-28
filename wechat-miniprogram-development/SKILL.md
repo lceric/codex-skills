@@ -119,6 +119,7 @@ When delivering changes:
 ## References
 
 - Read [wechat-guidelines.md](references/wechat-guidelines.md) for a compact implementation checklist and reusable prompts.
+- Read [page-pr-checklist.md](references/page-pr-checklist.md) before finishing page-level PRs to avoid route/loop/template regressions.
 
 ## 8) Popup Branch Refactor Lessons
 
@@ -147,3 +148,63 @@ When patching JSON/JS/WXML in bulk:
 - Prefer structural edits over brittle string replacement that can inject literal escape artifacts (for example accidental `` `n `` in JSON).
 - Re-open modified files immediately and verify syntax/format after scripted replacements.
 - If a scripted replacement corrupts formatting, rewrite the full file content once to restore canonical structure.
+
+## 10) Popup Scroll Ownership (Important)
+
+When popup content is long in WeChat Mini Program, keep one and only one vertical scroll owner.
+
+- For `t-popup` content that can exceed viewport height, assign exactly one scroll container.
+- Preferred page-level pattern:
+  - wrap popup content with `<scroll-view type="list" scroll-y style="height: 80vh">...</scroll-view>`.
+- If page-level wrapper is the scroll owner, remove component-internal scroll constraints:
+  - remove nested `<scroll-view>` in the child component,
+  - remove `max-height` / `overflow-y` on the component root when they duplicate scrolling.
+- Avoid mixed nested scroll systems (`scroll-view` + CSS `overflow-y`) for the same axis; this commonly causes no-scroll or gesture conflicts.
+- Keep the same popup family on one scroll pattern so behavior is predictable across branches.
+- If a fixed header is required inside popup, split structure into `header` + `scroll body` instead of making the entire popup node scroll.
+
+Quick debug checklist when popup cannot scroll:
+
+- Confirm content actually overflows target height (`70vh`/`80vh`).
+- Check there is no competing parent/child vertical scroll container.
+- Check whether `prevent-scroll-through` is enabled and whether internal scroll owner still receives gestures.
+- Reproduce on device and DevTools; nested scroll conflicts are often device-sensitive.
+
+## 11) Component-Local Popup Pattern
+
+For detail popups launched from reusable components (for example a person card "AI insight" entry):
+
+- Keep responsibilities clear:
+  - component owns popup visibility and close/open methods,
+  - page remains orchestration only for cross-component concerns.
+- Use explicit event hooks for observability without coupling:
+  - component may `triggerEvent('insightopen')` and `triggerEvent('insightclose')`,
+  - page can listen when needed, but should not be forced to mirror popup UI state.
+- Normalize PRD rich text to typed data:
+  - use arrays like `analysisList -> [{ id, dotColor, parts: [{ text, tone }] }]`,
+  - render with `wx:for` and class variants instead of hardcoded repeated blocks.
+- Keep one vertical scroll owner in popup content:
+  - recommended: popup root with fixed header + one content `scroll-view`,
+  - avoid mixed `sticky + nested scroll-view + overflow-y` combinations.
+- Verification checklist for this pattern:
+  - `t-popup` is registered in component `usingComponents`,
+  - popup opens from `bindtap` on trigger row and can close by overlay/button,
+  - no raw web tags (`<div>`, `<svg>`) remain in converted WXML branch.
+
+## 12) Page Entry Navigation Checklist
+
+For “click card -> open new page” requirements, enforce this three-point check together:
+
+- WXML entry node has `bindtap` and a clear handler name.
+- Page JS implements the handler with `wx.navigateTo({ url })`.
+- Target page path is registered in `src/app.json` `pages` (for non-tab pages).
+
+If any one is missing, navigation will silently fail or report route-not-found.
+
+## 13) Nested `wx:for` Safety
+
+When templates contain nested loops:
+
+- Always define `wx:for-item` for the inner loop (for example `nutrient`) and avoid alias reuse with outer loop items.
+- Keep display classes split by semantic target (`tag`, `icon`, `value`), rather than reusing one mixed class string.
+- Prefer putting loop config in page `data` arrays to keep template logic thin and maintainable.

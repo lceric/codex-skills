@@ -81,6 +81,7 @@ Build WeChat Mini Program pages from PRD HTML or static web mockups without carr
 
 - Read [references/html-to-miniprogram.md](references/html-to-miniprogram.md) for element mapping, unsupported-pattern cleanup, and TDesign-first selection rules.
 - Read [references/project-conventions.md](references/project-conventions.md) for project-specific implementation conventions and example paths.
+- Read [references/page-pr-checklist.md](references/page-pr-checklist.md) before delivery for route wiring and nested-loop safety checks.
 
 
 ## Practical Lessons: Popup HTML -> Mini Program Component
@@ -93,3 +94,36 @@ For PRD snippets that belong to popup branch content:
 - Keep repeated advice rows data-driven with `wx:for`; avoid hardcoding each row in page template.
 - Update three layers together: page branch markup, page data object, page `usingComponents` registration.
 - Include a final cleanup scan to ensure no raw web tags remain in converted branch blocks.
+
+## Practical Lessons: Popup Scroll Ownership
+
+When converting PRD/web popup content into mini-program `t-popup`, enforce a single vertical scroll owner.
+
+- Use one `scroll-view` for long popup content; recommended wrapper:
+  `<scroll-view type="list" scroll-y style="height: 80vh">...</scroll-view>`.
+- Avoid dual scrolling on the same axis:
+  - do not keep both outer popup `scroll-view` and child component `scroll-view`,
+  - do not mix `scroll-view` with duplicated root `overflow-y`/`max-height` constraints.
+- If popup needs fixed header + scrolling content, split into `header` + `scroll body` structure.
+- Keep all popup branches under the same scroll pattern to avoid inconsistent gesture behavior.
+- During refactor, verify overflow and gestures on both DevTools and real device.
+
+## Practical Lessons: Card-Embedded Insight Popup
+
+When converting PRD popup snippets that are triggered from a reusable card/component:
+
+- Keep popup visibility state local to the component by default; do not push this state to page level unless multiple modules must coordinate popup behavior.
+- Register `t-popup` in the component `index.json` when popup is owned by the component.
+- Expose optional component events (for example `insightopen` / `insightclose`) so the page can observe analytics or side effects without owning render state.
+- For PRD paragraphs that include emphasized words, model content as structured parts in JS (for example `[{ text, tone }]`) and render with nested `<text>` + class mapping; avoid raw HTML/rich-text injection.
+- Prefer popup structure as `container -> fixed header -> single scroll-view body`; avoid relying on sticky header behavior inside nested scrolling because compatibility can vary across devices.
+
+## Practical Lessons: PRD List Conversion Reliability
+
+When converting long PRD HTML list blocks (metrics, meal cards, tips) into Mini Program templates:
+
+- Prefer data-driven rendering with `wx:for` over hardcoded repeated blocks; keep values/config in `*.js`.
+- In nested loops, always set explicit inner aliases (for example `wx:for-item="nutrient"`), avoid reusing outer `item` to prevent shadowing and accidental binding errors.
+- Avoid using one dynamic class field for both container and icon text color; split into dedicated fields (for example `statusTagClass` and `statusIconClass`) so style intent stays clear.
+- Before delivery, run a quick raw-tag scan on touched WXML to ensure no `<div>/<span>/<svg>` or web event attrs remain.
+- For detail entry cards that should navigate, complete the full path wiring in one pass: card `bindtap` + page handler + `app.json` page registration.
