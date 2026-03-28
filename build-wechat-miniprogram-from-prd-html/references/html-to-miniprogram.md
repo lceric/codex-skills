@@ -67,6 +67,19 @@ Use this reference when converting PRD HTML, prototype markup, or static web sni
 - Default to `rpx` when introducing new layout sizes in a mini-program page.
 - Rebuild decorative SVG accents with borders, background colors, gradients, or existing icons when practical.
 
+## Popup Branch Extraction Pattern
+
+- For `t-popup` with multiple branches, keep page-level branch selector (`currentType`) and extract heavy branch body into standalone components.
+- Prefer one object prop contract from page to component (for example `risk-data="{{riskPopup}}"`) rather than many flat props.
+- Register extracted component in page `index.json`; keep TDesign dependencies scoped in component `index.json`.
+- Keep popup branch rendering in component and keep branch switching logic in page.
+- Add mock trigger data if a branch has no natural entry in current API response, then remove/adjust mock data as needed.
+
+## TDesign Icon Validation
+
+- Validate icon names against local `node_modules/tdesign-miniprogram/miniprogram_dist/icon/icon.wxss`.
+- Prefer icon names already used by the project to reduce visual inconsistency and runtime surprises.
+- If no suitable icon exists, use image asset fallback rather than leaving inline SVG.
 ## Decision Heuristics
 
 - If the PRD block looks like a settings row, inspect existing `t-cell` usage before writing custom layout.

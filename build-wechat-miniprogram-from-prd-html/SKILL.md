@@ -16,6 +16,7 @@ Build WeChat Mini Program pages from PRD HTML or static web mockups without carr
 2. Inspect the target project before writing code.
    - Find similar pages or components with `rg -n "usingComponents|<t-|tdesign-miniprogram" src`.
    - Confirm page file structure, style file type, naming, and event-binding conventions.
+  - Verify TDesign icon names against local `node_modules/tdesign-miniprogram/miniprogram_dist/icon/icon.wxss` before selecting icons.
    - Read [references/project-conventions.md](references/project-conventions.md) when working in an existing project.
 
 3. Plan the conversion in mini-program terms.
@@ -25,11 +26,13 @@ Build WeChat Mini Program pages from PRD HTML or static web mockups without carr
    - Keep the original TailwindCSS utility class intent whenever the class is compatible with the project's mini-program Tailwind setup.
    - Decide which data should live in `*.js`, which components must be registered in `*.json`, and which layout rules belong in `*.scss` only when utility classes are insufficient or awkward.
    - Read [references/html-to-miniprogram.md](references/html-to-miniprogram.md) for tag mapping and component selection.
+  - For long popup branch content (for example `wx:elif` risk detail), extract into a dedicated component and pass a structured object from page data.
 
 4. Implement the result as mini-program files.
    - Write `*.wxml` with mini-program syntax only.
    - Update `*.json` to register every `tdesign-miniprogram` component used.
    - Add or update `*.js` data, lifecycle hooks, and handler stubs needed by the page.
+  - When popup branch conversion introduces a new component, register it in page `usingComponents` and register TDesign dependencies in component `usingComponents`.
    - Preserve TailwindCSS utility classes in `*.wxml` whenever they already express the desired layout and visual style clearly.
    - Add or update `*.scss` only for layout, spacing, typography, and local overrides that are not cleanly expressed with existing utility classes.
 
@@ -37,6 +40,7 @@ Build WeChat Mini Program pages from PRD HTML or static web mockups without carr
    - Keep visual hierarchy and interaction intent, but simplify brittle web-only structure when needed.
    - Remove raw HTML tags, DOM-only events, React/Vue syntax, and unsupported inline SVG.
    - Check `wx:if`, `wx:for`, `bindtap`, `slot`, component registration, and placeholder data completeness.
+  - Confirm branch trigger paths exist; if missing, add temporary/mock data to open and verify each branch during development.
 
 ## Output Contract
 
@@ -49,6 +53,7 @@ Build WeChat Mini Program pages from PRD HTML or static web mockups without carr
 - Register components explicitly in the page or component `*.json`.
 - Keep units and layout choices aligned with the project; preserve existing utility classes first and default to `rpx` when creating new styles in `*.scss`.
 - Keep data-driven or repeated regions in `*.js` + `wx:for` rather than hardcoding every item.
+- Treat popup branch content as extractable component units with explicit page->component data contracts.
 
 ## Conversion Rules
 
@@ -77,3 +82,14 @@ Build WeChat Mini Program pages from PRD HTML or static web mockups without carr
 - Read [references/html-to-miniprogram.md](references/html-to-miniprogram.md) for element mapping, unsupported-pattern cleanup, and TDesign-first selection rules.
 - Read [references/project-conventions.md](references/project-conventions.md) for project-specific implementation conventions and example paths.
 
+
+## Practical Lessons: Popup HTML -> Mini Program Component
+
+For PRD snippets that belong to popup branch content:
+
+- Do not leave long branch HTML inline in page WXML. Convert once, then extract to dedicated component immediately.
+- Convert icons with `t-icon` (for example `activity`, `heart`, `time`) rather than inline SVG paths.
+- Use a single object prop contract (for example `exerciseData`, `sleepData`) to carry title/time/summary/advice list.
+- Keep repeated advice rows data-driven with `wx:for`; avoid hardcoding each row in page template.
+- Update three layers together: page branch markup, page data object, page `usingComponents` registration.
+- Include a final cleanup scan to ensure no raw web tags remain in converted branch blocks.

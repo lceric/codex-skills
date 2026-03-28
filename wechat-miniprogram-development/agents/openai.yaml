@@ -1,0 +1,4 @@
+interface:
+  display_name: "WeChat Mini Program Development"
+  short_description: "Build and refactor WeChat Mini Program apps"
+  default_prompt: "Use $wechat-miniprogram-development to implement and optimize a WeChat Mini Program feature end-to-end."
