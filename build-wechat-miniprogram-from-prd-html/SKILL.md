@@ -21,6 +21,7 @@ Build WeChat Mini Program pages from PRD HTML or static web mockups without carr
 3. Plan the conversion in mini-program terms.
    - Re-map web DOM into `view`, `text`, `image`, `block`, `scroll-view`, and TDesign components.
    - Replace inline SVG or icon fonts with `t-icon` first.
+   - For check/toggle interactions (permission switch, enable/disable state), prefer `t-switch` first, then `t-checkbox` or `t-radio-group` when semantics require it. Avoid handcrafted Tailwind peer-selector toggles.
    - Keep the original TailwindCSS utility class intent whenever the class is compatible with the project's mini-program Tailwind setup.
    - Decide which data should live in `*.js`, which components must be registered in `*.json`, and which layout rules belong in `*.scss` only when utility classes are insufficient or awkward.
    - Read [references/html-to-miniprogram.md](references/html-to-miniprogram.md) for tag mapping and component selection.
@@ -44,6 +45,7 @@ Build WeChat Mini Program pages from PRD HTML or static web mockups without carr
 - Preserve compatible TailwindCSS class expressions from the source whenever possible instead of rewriting them into custom SCSS.
 - Prefer `tdesign-miniprogram` for common UI building blocks such as nav, cells, cards, tabs, buttons, forms, dialogs, tags, loading, and icons.
 - Prefer `t-icon` over inline `svg`, iconfont fragments, or raw path markup.
+- For check-like UI controls, prefer TDesign controls (`t-switch`, `t-checkbox`, `t-radio-group`) instead of custom `view` + pseudo-element toggles.
 - Register components explicitly in the page or component `*.json`.
 - Keep units and layout choices aligned with the project; preserve existing utility classes first and default to `rpx` when creating new styles in `*.scss`.
 - Keep data-driven or repeated regions in `*.js` + `wx:for` rather than hardcoding every item.
@@ -54,11 +56,13 @@ Build WeChat Mini Program pages from PRD HTML or static web mockups without carr
 - Convert inline labels into `text` when that improves clarity.
 - Convert `img` into `image` or `t-image`.
 - Convert `button` into `t-button` when the UI is a standard action.
+- Convert check/toggle UI into `t-switch`, `t-checkbox`, or `t-radio-group` first instead of custom peer-based switch markup.
 - Keep TailwindCSS utility classes on converted nodes whenever those classes are already supported by the project's mini-program Tailwind pipeline.
 - Convert settings, list rows, and profile rows into `t-cell-group` + `t-cell` where appropriate.
 - Convert repeated icon badges, metrics, or shortcuts into `t-grid` + `t-grid-item` when that matches the layout.
 - Convert tabs, pickers, uploaders, notices, dialogs, and form controls into their TDesign counterparts before writing custom primitives.
 - Drop only Tailwind classes that are web-only, unsupported, or made irrelevant by the chosen mini-program component.
+- Avoid Tailwind peer variants like `peer-checked:*` and `peer-focus:*` for toggle behavior; these often compile into sibling selectors such as `~`, which can cause WXSS compile incompatibilities.
 - Replace `onclick`, `onchange`, `className`, `style={{}}`, `v-if`, `v-for`, `@click`, and JSX fragments with mini-program syntax.
 
 ## PRD HTML Interpretation
@@ -72,3 +76,4 @@ Build WeChat Mini Program pages from PRD HTML or static web mockups without carr
 
 - Read [references/html-to-miniprogram.md](references/html-to-miniprogram.md) for element mapping, unsupported-pattern cleanup, and TDesign-first selection rules.
 - Read [references/project-conventions.md](references/project-conventions.md) for project-specific implementation conventions and example paths.
+

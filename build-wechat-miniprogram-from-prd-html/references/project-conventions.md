@@ -15,6 +15,7 @@ Use this reference when the target project matches the current health-front styl
 - Register every TDesign component explicitly in the page or component `*.json` under `usingComponents`.
 - Keep page data and interaction handlers in `*.js`.
 - Keep compatible Tailwind utility classes in `*.wxml` instead of moving them into `*.scss` by default.
+- For check/toggle interactions, use `t-switch` (or `t-checkbox`/`t-radio-group` as needed) rather than custom peer-selector switches.
 - Keep local visual overrides in `*.scss` only for cases the utility layer does not cover cleanly.
 - Reuse patterns already present in nearby pages when possible.
 
@@ -34,6 +35,7 @@ Use this reference when the target project matches the current health-front styl
 - Navigation: `t-navbar`
 - Feedback: `t-toast`, `t-message`, `t-dialog`, `t-loading`
 - Forms: `t-input`, `t-textarea`, `t-radio-group`, `t-picker`, `t-upload`
+- Binary toggles: `t-switch`
 - Icons: `t-icon`
 
 ## Search Patterns
@@ -52,3 +54,4 @@ Use these searches to find implementation references quickly:
 3. Update `*.js` with data, derived labels, and handler stubs.
 4. Preserve useful Tailwind classes in `*.wxml`; update `*.scss` only for necessary local styling.
 5. Remove any remaining web-only syntax before finishing.
+

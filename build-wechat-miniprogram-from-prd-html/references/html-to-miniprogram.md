@@ -35,6 +35,7 @@ Use this reference when converting PRD HTML, prototype markup, or static web sni
 - Grid shortcuts or feature entries: `t-grid`, `t-grid-item`
 - Avatar and images: `t-avatar`, `t-image`
 - Form input: `t-input`, `t-textarea`, `t-radio-group`, `t-picker`, `t-date-time-picker`, `t-upload`
+- Toggle and checked state: `t-switch` first for binary on/off, then `t-checkbox` or `t-radio-group` based on semantics
 - Notice and feedback: `t-notice-bar`, `t-toast`, `t-message`, `t-dialog`, `t-loading`
 - Icons: `t-icon`
 
@@ -46,6 +47,7 @@ Use this reference when converting PRD HTML, prototype markup, or static web sni
 - React/Vue syntax such as `className`, `style={{}}`, fragments, `v-if`, `v-for`, `@click`
 - Browser-only navigation or form assumptions
 - Tailwind classes are not part of the unsupported list by default; keep them unless they no longer apply after conversion.
+- Tailwind peer-selector toggle patterns (for example `peer-checked:*`, `peer-focus:*`) when they rely on sibling selector outputs such as `~` in WXSS.
 
 ## WXML Rewrites
 
@@ -72,3 +74,5 @@ Use this reference when converting PRD HTML, prototype markup, or static web sni
 - If the PRD uses a generic icon next to a label, find an existing `t-icon` name already used in the project before inventing a new pattern.
 - If the PRD already has readable Tailwind utility classes, preserve them on the converted mini-program nodes unless a component replacement makes them obsolete.
 - If the PRD suggests a complex web interaction that the current project does not support, implement the simplest mini-program-compatible version and note the assumption.
+- If the PRD shows a custom web checkbox/toggle, prefer replacing it with `t-switch` to avoid WXSS selector-compatibility issues from handcrafted peer-state CSS.
+
