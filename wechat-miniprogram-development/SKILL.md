@@ -208,3 +208,39 @@ When templates contain nested loops:
 - Always define `wx:for-item` for the inner loop (for example `nutrient`) and avoid alias reuse with outer loop items.
 - Keep display classes split by semantic target (`tag`, `icon`, `value`), rather than reusing one mixed class string.
 - Prefer putting loop config in page `data` arrays to keep template logic thin and maintainable.
+
+## 14) Period Switch Split-Render Pattern
+
+For requirements like "keep `day` old layout, migrate only `week/month/year` to new PRD layout":
+
+- Use page-level conditional rendering:
+  - `wx:if="{{ activePeriod === 'day' }}"` for legacy day block,
+  - `wx:else` (or explicit branches) for the new report component.
+- Keep page as orchestration layer:
+  - `updatePeriodContent(period)` decides branch and calls `setData`,
+  - component only renders incoming `reportData`.
+- Maintain separate sources of truth to avoid coupling:
+  - `sections` for day list cards,
+  - `reportDataMap` (plus optional normalize/decorate step) for period reports.
+- Keep `usingComponents` complete after refactor:
+  - include both legacy dependencies (`remind-card`, `t-icon`) and new component registration.
+- Preserve backwards-compatible styles for legacy branch and avoid leaking overrides into new component styles.
+- Quick verification checklist:
+  - each tab renders expected structure,
+  - switch state does not retain stale data from previous branch,
+  - no removed handler/component is still referenced in WXML.
+
+## 15) Tailwind Extraction Safety (Important)
+
+When a project uses Tailwind-like utilities in Mini Program:
+
+- Keep key utility classes literal in `wxml` whenever possible; avoid hiding core layout/visual classes inside JS-only strings.
+- Assume dynamic class strings in `data` (`item.className`) may be dropped by extraction in some pipelines; if used, verify generated CSS explicitly.
+- Prefer simple, deterministic rendering for repeated blocks:
+  - keep structure in `wx:for`,
+  - keep critical classes static in template nodes,
+  - move unstable variants to `scss` fallback classes when necessary.
+- For unsupported or weakly-supported web behaviors (hover groups, advanced filters, list marker semantics on `view`), implement Mini Program-native fallback instead of forcing parity.
+- Add a quick production-artifact check before finishing:
+  - search `dist/app.wxss` for several must-have classes from the touched page,
+  - if missing, rewrite to static classes or add scoped `scss` equivalents.

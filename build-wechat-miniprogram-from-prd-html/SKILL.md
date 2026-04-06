@@ -127,3 +127,27 @@ When converting long PRD HTML list blocks (metrics, meal cards, tips) into Mini 
 - Avoid using one dynamic class field for both container and icon text color; split into dedicated fields (for example `statusTagClass` and `statusIconClass`) so style intent stays clear.
 - Before delivery, run a quick raw-tag scan on touched WXML to ensure no `<div>/<span>/<svg>` or web event attrs remain.
 - For detail entry cards that should navigate, complete the full path wiring in one pass: card `bindtap` + page handler + `app.json` page registration.
+
+## Practical Lessons: Hybrid Period View Migration
+
+When PRD requires new period reports (`week/month/year`) but existing `day` content must remain unchanged:
+
+- Keep `day` as a legacy branch; do not force-convert it into the new PRD structure unless explicitly requested.
+- Extract PRD report UI into a dedicated component (for example `DietPeriodReport`) and keep page template split with `wx:if` / `wx:else`.
+- Let page JS orchestrate two data models in parallel:
+  - `sections` for legacy day cards,
+  - `reportDataMap` + normalized/decorated report object for period reports.
+- Include all required `usingComponents` together (legacy + new); avoid accidental removal during migration.
+- Keep visual parity for both branches by preserving legacy style overrides (`.day-card .remind-card ...`) while scoping new styles to the new component.
+- Verify all tabs after migration (`day`, `week`, `month`, `year`) to catch branch-specific regressions early.
+
+## Practical Lessons: Tailwind Fidelity and Build Reliability
+
+When the user explicitly asks to keep PRD Tailwind classes, apply this rule set:
+
+- Keep PRD utility classes literal in `*.wxml` first; avoid renaming to custom semantic classes unless required.
+- Do not put critical Tailwind utility class strings only in `*.js` data/config (for example `item.className`) because some build pipelines may not extract them reliably.
+- For repeated blocks, prefer literal classes in template branches over dynamic class-string assembly when style fidelity matters.
+- Treat web-centric utilities as suspect in Mini Program context (`group-hover:*`, hover-only effects, some blur/filter utilities, complex opacity slash variants like `shadow-*/30`); provide explicit fallback style in `*.scss` when needed.
+- Do not rely on CSS list markers for `view` nodes; render explicit bullet text (`•`) in WXML for predictable output.
+- Add a post-conversion check: grep `dist/app.wxss` for 3-5 load-bearing PRD classes to confirm they were generated before delivery.
