@@ -151,3 +151,46 @@ When the user explicitly asks to keep PRD Tailwind classes, apply this rule set:
 - Treat web-centric utilities as suspect in Mini Program context (`group-hover:*`, hover-only effects, some blur/filter utilities, complex opacity slash variants like `shadow-*/30`); provide explicit fallback style in `*.scss` when needed.
 - Do not rely on CSS list markers for `view` nodes; render explicit bullet text (`•`) in WXML for predictable output.
 - Add a post-conversion check: grep `dist/app.wxss` for 3-5 load-bearing PRD classes to confirm they were generated before delivery.
+
+## Practical Lessons: Center Popup List Visibility
+
+When a converted center popup (`t-popup placement="center"`) renders blank or appears to have "no content", apply this checklist:
+
+- For popup-internal `scroll-view`, set explicit viewport height inline first:
+  - `<scroll-view type="list" scroll-y style="height: 80vh">...</scroll-view>`.
+- Do not rely only on class-based `max-height` for the first implementation; in some layouts this can still produce zero/insufficient render height.
+- Keep one vertical scroll owner. If the child component owns scroll, remove extra popup/page wrappers that also scroll on Y.
+- Keep popup option-row style ownership inside the popup component stylesheet (icon wrap color class, icon color class), instead of depending on page stylesheet injection.
+- Verify end-to-end trigger chain in one pass:
+  - page `visible` state update,
+  - `bind:visible-change` sync,
+  - component `close/select` events.
+- Avoid relying on `wxml` array-index expressions for critical label rendering (for example `{{relationOptions[relationIndex]}}`); prefer a derived display field in `data` such as `selectedRelation`.
+- In component `properties` observers, initialize popup form state with direct `setData` or guarded logic; avoid fragile observer -> method indirection as the first render path.
+- Keep popup shell visuals (`background`, `border-radius`, `shadow`, width) in the popup component stylesheet/class, not only utility classes on the root node.
+- For popup body `scroll-view`, use explicit height + max-height fallback together on first implementation (for example `height: 960rpx; max-height: 76vh;`) to reduce blank-content risk across devices.
+
+## Practical Lessons: Tailwind-First + Node Semantics
+
+When the user explicitly asks to keep PRD Tailwind classes, and especially when converting badge/chip/tag rows:
+
+- Keep Tailwind utility classes in WXML as the first implementation path; do not prematurely rewrite equivalent styles into custom SCSS class names.
+- If a node carries layout/box responsibilities (`px-*`, `py-*`, `rounded-*`, `border-*`, `w-*`, `h-*`, `flex-*`, margin/padding/display), use `view` as the container node.
+- Reserve `text` for textual semantics only; for chip/badge patterns use `view` wrapper + inner `text`.
+- During review, run a quick structure pass on touched WXML:
+  - find `text` nodes with obvious layout utility classes,
+  - convert those wrappers to `view` while keeping inner text rendering unchanged.
+- Prefer this conversion order for stability:
+  - PRD utility classes preserved in WXML,
+  - minimal SCSS supplement only when utility classes are insufficient.
+
+## Practical Lessons: First-Pass Delivery Completeness
+
+For new page conversion tasks, complete route + page + component wiring in one pass before reporting done:
+
+- Create/verify full page quartet: `index.json`, `index.wxml`, `index.js`, `index.scss|wxss`.
+- Register page path in `src/app.json` before handoff.
+- Register all child components in page `usingComponents` and ensure component files (`js/json/wxml/scss`) are all present.
+- If color/style is requested from PRD, verify both:
+  - page-level background and card gradients,
+  - component-level style ownership for critical blocks.

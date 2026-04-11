@@ -244,3 +244,60 @@ When a project uses Tailwind-like utilities in Mini Program:
 - Add a quick production-artifact check before finishing:
   - search `dist/app.wxss` for several must-have classes from the touched page,
   - if missing, rewrite to static classes or add scoped `scss` equivalents.
+
+## 16) Center Popup Debug Pattern (Blank Content)
+
+For issues like "popup opened but content area is blank", run this debug sequence:
+
+- Confirm visibility contract first:
+  - page data has `popupVisible`,
+  - open action sets it to `true`,
+  - `t-popup visible="{{popupVisible}}"` is bound correctly.
+- If popup content uses `scroll-view`, prefer explicit inline height immediately:
+  - `<scroll-view type="list" scroll-y style="height: 80vh">...</scroll-view>`.
+- Avoid ambiguous first-pass constraints (`max-height` only, nested Y-scroll containers, or mixed `overflow-y + scroll-view`).
+- For popup list/item styles driven by data class names, keep these classes in popup component `index.scss|wxss` to avoid cross-file style coupling.
+- Avoid critical `wxml` array-index interpolation for popup labels (for example `{{relationOptions[relationIndex]}}`); keep a synchronized display field in data (for example `selectedRelation`).
+- In popup component `properties` observers, prefer direct `setData` initialization for open-state reset; avoid observer calling another method as the only first-render path.
+- Make popup root container style explicit in component stylesheet (`background`, `border-radius`, `overflow`, width, shadow) to avoid root utility-class loss causing invisible body.
+- For center popup `scroll-view`, apply both fixed height and `max-height` in first pass (for example `height: 960rpx; max-height: 76vh;`), then refine after device verification.
+- Validate close behavior symmetry:
+  - overlay close (`bind:visible-change`) and explicit close button event should both reset the same page state.
+- Fast isolation trick:
+  - temporarily replace popup body with a static `<view>` block;
+  - if visible, issue is scroll/layout constraints, not popup registration.
+
+## 17) Tailwind-First + `view/text` Contract
+
+For projects using Tailwind-like utility classes, keep this node contract strict:
+
+- Preserve utility classes in WXML first; avoid rewriting to custom SCSS too early.
+- If a node has layout/box styling (`px/py`, `rounded`, `border`, `w/h`, `flex`, margin/padding/display), that node should be `view`, not `text`.
+- Use `text` for pure text semantics; for version badges/chips, use:
+  - outer `view` with layout/background/border classes,
+  - inner `text` with font/color classes.
+- Add a quick pre-delivery check on touched files:
+  - scan for `text` nodes carrying obvious layout utility classes,
+  - convert to `view` wrappers to reduce cross-device rendering issues.
+
+## 18) Version Display Data Source Pattern
+
+When a page needs "current mini program version", avoid hardcoded constants as source of truth:
+
+- Read from `wx.getAccountInfoSync().miniProgram.version` first.
+- Normalize format to `v*` when needed (for example `2.1.0` -> `v2.1.0`).
+- Provide fallback for non-release env:
+  - `develop` -> `开发版`,
+  - `trial` -> `体验版`,
+  - final fallback to a safe default constant.
+- Put this logic in shared `src/utils` helper and reuse across pages (for example About + Version pages) to keep behavior consistent.
+
+## 19) One-Pass Delivery Checklist for New Page Tasks
+
+For "click entry -> navigate to new page" requirements, finish all dependencies in one pass:
+
+- Entry handler: `bindtap` + page JS `wx.navigateTo`.
+- Route registration: target page added in `src/app.json`.
+- New page files complete: `index.json/wxml/js/scss`.
+- Component extraction complete when used: each component has `js/json/wxml/scss` + page `usingComponents`.
+- Run final sanity check that styles are not missing due to absent `index.scss` or missing component registration.
