@@ -1,0 +1,23 @@
+{
+  "skill_name": "next-console-engineering",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "In this Next.js App Router project, add a login-gated admin console with a left sidebar and a token management table. The upstream service is https://api.example.com and the token list endpoint should look like /api/token/?p=1&size=10. Login sets an HTTP Only session cookie. Keep components small and configurable.",
+      "expected_output": "Uses local Next docs/AGENTS guidance, creates a same-origin /api/[...path] Node proxy, does not require token response for login, implements sidebar/header/table/dialog components in separate files, and runs lint/build.",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "This console page works but the whole thing is in one 800-line components/console/console-app.tsx file. Split it into clean modules without changing behavior.",
+      "expected_output": "Splits entry, shell, layout, feature, dialog, small controls, formatting helpers, and clipboard helpers into focused files while preserving imports and passing lint/build.",
+      "files": []
+    },
+    {
+      "id": 3,
+      "prompt": "The browser shows a CORS error after login because the API returns Access-Control-Allow-Origin: * and also sets cookies. Make the frontend call /api/user/login directly and proxy it through Next to http://api.example.com/api/user/login.",
+      "expected_output": "Implements an App Router catch-all route under app/api/[...path]/route.ts, forwards query/body/headers, rewrites Set-Cookie Domain for same-origin storage, uses credentials same-origin, and avoids adding /api/proxy when not requested.",
+      "files": []
+    }
+  ]
+}
