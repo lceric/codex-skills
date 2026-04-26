@@ -1,5 +1,5 @@
 {
-  "skill_name": "next-console-engineering",
+  "skill_name": "sem-dev",
   "evals": [
     {
       "id": 1,
@@ -17,6 +17,12 @@
       "id": 3,
       "prompt": "The browser shows a CORS error after login because the API returns Access-Control-Allow-Origin: * and also sets cookies. Make the frontend call /api/user/login directly and proxy it through Next to http://api.example.com/api/user/login.",
       "expected_output": "Implements an App Router catch-all route under app/api/[...path]/route.ts, forwards query/body/headers, rewrites Set-Cookie Domain for same-origin storage, uses credentials same-origin, and avoids adding /api/proxy when not requested.",
+      "files": []
+    },
+    {
+      "id": 4,
+      "prompt": "In the token management page, update calls must match this curl: PUT http://api.example.com/api/token/ with JSON body containing id, name, remain_quota, expired_time, unlimited_quota, model_limits_enabled, model_limits, cross_group_retry, group, allow_ips. The browser must call /api/token without triggering a 308, carry HTTP Only cookies, forward new-api-user from the logged-in user id, and GET /api/token?p=1&size=10 must not be cached.",
+      "expected_output": "Uses browser path /api/token for PUT with id in body, normalizes upstream trailing slash inside the Node proxy, forwards Cookie and Set-Cookie, adds new-api-user from session.user.id, and sets no-store/no-cache headers for management GETs and proxy responses.",
       "files": []
     }
   ]
