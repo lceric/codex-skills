@@ -1,0 +1,7 @@
+interface:
+  display_name: "电影级打斗提示词"
+  short_description: "设计连续、可读且有冲击力的战斗视频提示词"
+  default_prompt: "使用 $cinematic-fight-prompts 为我的角色创作一段电影级连续打斗视频提示词。"
+
+policy:
+  allow_implicit_invocation: true
